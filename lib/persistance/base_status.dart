@@ -6,6 +6,9 @@ enum StatusType {
   refreshing,
   paging,
   success,
+  sending,
+  sent,
+  updated,
   error,
 }
 
@@ -56,6 +59,24 @@ class BaseStatus {
   factory BaseStatus.paging() {
     return BaseStatus(
       type: StatusType.paging,
+    );
+  }
+
+  factory BaseStatus.sending() {
+    return BaseStatus(
+      type: StatusType.sending,
+    );
+  }
+
+  factory BaseStatus.sent() {
+    return BaseStatus(
+      type: StatusType.sent,
+    );
+  }
+
+  factory BaseStatus.updated() {
+    return BaseStatus(
+      type: StatusType.updated,
     );
   }
 

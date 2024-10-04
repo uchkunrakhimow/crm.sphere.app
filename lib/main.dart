@@ -1,17 +1,31 @@
 import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:tedbook/firebase_options.dart';
+import 'package:tedbook/pages/home/bloc/home_bloc.dart';
+import 'package:tedbook/pages/home/home_page.dart';
 import 'package:tedbook/pages/login/bloc/login_bloc.dart';
 import 'package:tedbook/pages/login/login_page.dart';
 import 'package:tedbook/pages/sample/bloc/sample_bloc.dart';
+import 'package:tedbook/persistance/service_locator.dart';
+import 'package:tedbook/persistance/user_data.dart';
+import 'package:tedbook/utils/color_utils.dart';
 
 GetIt getIt = GetIt.instance;
+bool _hasToken = false;
 
 void main() async {
   HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
+  setupLocator();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  final UserData _userData = getInstance();
+  _hasToken = (await _userData.accessToken())?.isNotEmpty == true;
 
   await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
     DeviceOrientation.portraitUp,
@@ -21,6 +35,7 @@ void main() async {
       MultiBlocProvider(
         providers: [
           BlocProvider(create: (context) => LoginBloc()),
+          BlocProvider(create: (context) => HomeBloc()),
           BlocProvider(create: (context) => SampleBloc()),
         ],
         child: MyApp(),
@@ -44,9 +59,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: false,scaffoldBackgroundColor: Color(0xFFECECEC)),
+      theme: ThemeData(
+        useMaterial3: false,
+        scaffoldBackgroundColor: AppColor.scaffoldBackColor,
+        brightness: Brightness.light,
+      ),
       title: 'Material App',
-      home: const LoginPage(),
+      home: _hasToken ? HomePage() : LoginPage(),
       debugShowCheckedModeBanner: false,
     );
   }

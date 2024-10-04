@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
 class AppColor {
-  static const Color appColor = Color(0xFFF6F6F8);
+  static const Color scaffoldBackColor = Color(0xFFECECEC);
   static const Color primaryAppColor = Color(0xFF5FDE33);
   static const Color customRedColor = Color(0xFF4C0120);
-  static const Color redColor = Color(0xFFD00606);
-  static const Color blackColor = Color(0xFF000000);
+  static const Color redColor = Color(0xFFD84745);
+  static const Color orangeColor = Color(0xFFFFA303);
+  static const Color blackColor = Color(0xFF1E1E1E);
   static const Color lightGreyColor = Color(0xFFE0E0E0);
   static const Color greyColor = Color(0xFF979C9E);
+  static const Color textColor = Color(0xFF292D32);
   static const Color textGreyColor = Color(0xFF6C6C6C);
+  static const Color cardColor = Color(0xFFF2F8FF);
 }
 
 class HexColor extends Color {

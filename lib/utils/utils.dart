@@ -1,28 +1,11 @@
 import 'dart:developer';
 import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:tedbook/model/response/error_response.dart';
-import 'package:tedbook/utils/constant.dart';
 
-debugLog(String s) {
-  if (kDebugMode) log(s);
-}
-
-String getErrorMessage(error) {
-  String errorMessage = SERVER_ERROR;
-  if (error is DioException && error.response != null) {
-    try {
-      final response = ErrorResponse.fromJson(error.response?.data);
-      debugLog("response ${response.error}");
-      errorMessage = response.error ?? SERVER_ERROR;
-    } catch (e) {
-      debugLog(e.toString());
-    }
-  }
-  return errorMessage;
+debugLog(dynamic s) {
+  if (kDebugMode) log(s.toString());
 }
 
 String currencyFormatter(double? number, {decimalDigit = 2}) {

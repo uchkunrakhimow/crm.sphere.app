@@ -1,25 +1,21 @@
 class LoginRequest {
-  String? sessionTicketId;
-  String? phone;
-  String? email;
+  String? username;
+  String? password;
 
   LoginRequest({
-    this.sessionTicketId,
-    this.email,
-    this.phone,
+    this.username,
+    this.password,
   });
 
   LoginRequest.fromJson(Map<String, dynamic> json) {
-    sessionTicketId = json['sessionTicketId'];
-    phone = json['phone'];
-    email = json['email'];
+    username = json['username'];
+    password = json['password'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['sessionTicketId'] = sessionTicketId;
-    if (phone != null) data['phone'] = phone;
-    if (email != null) data['email'] = email;
+    data['username'] = username;
+    if (password != null) data['password'] = password;
     return data;
   }
 }

@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tedbook/model/response/general_user_data_response.dart';
-import 'package:tedbook/utils/utils.dart';
+import 'package:tedbook/model/response/login_response.dart';
 
 class UserData {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -12,78 +10,61 @@ class UserData {
   // Don't use create or default constructor. Use getInstance() method to get UserData object
   factory UserData.create() => UserData._();
 
-  Future<void> setLang(String lang) async {
+  Future<void> saveGeneralUserData(UserModel user) async {
     final SharedPreferences prefs = await _prefs;
-    prefs.setString('lang', lang);
+    if (user.id?.isNotEmpty == true) await prefs.setString('user_id', user.id!);
+    if (user.username?.isNotEmpty == true)
+      await prefs.setString('user_name', user.username!);
+    if (user.role?.isNotEmpty == true)
+      await prefs.setString('role', user.role!);
   }
 
-  Future<String> getLang() async {
+  Future<void> saveGeneralToken(TokenModel tokens) async {
     final SharedPreferences prefs = await _prefs;
-    return prefs.getString('lang') ?? "ru";
-  }
-
-  Future<void> saveGeneralToken(
-    String accessToken,
-    String refreshToken,
-  ) async {
-    debugLog("accessToken: $accessToken");
-    final SharedPreferences prefs = await _prefs;
-    await prefs.setString('general_access_token', accessToken);
-    await prefs.setString('general_refresh_token', refreshToken);
+    if (tokens.accessToken?.isNotEmpty == true)
+      await prefs.setString('access_token', tokens.accessToken!);
+    if (tokens.refreshToken?.isNotEmpty == true)
+      await prefs.setString('refresh_token', tokens.refreshToken!);
   }
 
   Future<void> saveAccessToken(String accessToken) async {
     final SharedPreferences prefs = await _prefs;
-    await prefs.setString('general_access_token', accessToken);
+    await prefs.setString('access_token', accessToken);
   }
 
   Future<void> saveRefreshToken(String accessToken) async {
     final SharedPreferences prefs = await _prefs;
-    await prefs.setString('general_refresh_token', accessToken);
-  }
-
-  Future<String?> accessToken() async {
-    Future<SharedPreferences> prefs0 = SharedPreferences.getInstance();
-    final SharedPreferences prefs = await prefs0;
-    return prefs.getString('general_access_token');
-  }
-
-  Future<String?> accessTokenExpirationDate() async {
-    Future<SharedPreferences> prefs0 = SharedPreferences.getInstance();
-    final SharedPreferences prefs = await prefs0;
-    return prefs.getString('access_token_expiration_date');
-  }
-
-  Future<String?> refreshToken() async {
-    Future<SharedPreferences> prefs0 = SharedPreferences.getInstance();
-    final SharedPreferences prefs = await prefs0;
-    return prefs.getString('general_refresh_token');
-  }
-
-  Future<void> saveGeneralUserData(GeneralUserData data) async {
-    final SharedPreferences prefs = await _prefs;
-    if (data.id != null) prefs.setInt('id', data.id!);
-    prefs.setString('nickName', data.nickName ?? "");
-    prefs.setString('phone', data.phone ?? "");
-    prefs.setString('fio', data.fio ?? "");
-    prefs.setString('pinfl', data.pinfl ?? "");
-    prefs.setInt('genderCode', data.genderCode ?? 0);
-    prefs.setString('genderName', data.genderName ?? "");
-    prefs.setString('lang', data.lang ?? "uz");
-    prefs.setStringList('roles',
-        data.roles?.map((role) => json.encode(role.toJson())).toList() ?? []);
+    await prefs.setString('refresh_token', accessToken);
   }
 
   Future<String?> userId() async {
     Future<SharedPreferences> prefs0 = SharedPreferences.getInstance();
     final SharedPreferences prefs = await prefs0;
-    return prefs.getString('id');
+    return prefs.getString('user_id');
   }
 
-  Future<String?> pinfl() async {
+  Future<String?> userName() async {
     Future<SharedPreferences> prefs0 = SharedPreferences.getInstance();
     final SharedPreferences prefs = await prefs0;
-    return prefs.getString('pinfl');
+    return prefs.getString('user_name');
+  }
+
+  Future<String?> userRole() async {
+    Future<SharedPreferences> prefs0 = SharedPreferences.getInstance();
+    final SharedPreferences prefs = await prefs0;
+    return prefs.getString('user_role');
+  }
+
+  Future<String?> accessToken() async {
+    Future<SharedPreferences> prefs0 = SharedPreferences.getInstance();
+    final SharedPreferences prefs = await prefs0;
+    return prefs.getString('access_token');
+  }
+
+  Future<String?> refreshToken() async {
+    Future<SharedPreferences> prefs0 = SharedPreferences.getInstance();
+    final SharedPreferences prefs = await prefs0;
+    return prefs.getString('refresh_token');
   }
 
   Future<void> clearAllData() async {

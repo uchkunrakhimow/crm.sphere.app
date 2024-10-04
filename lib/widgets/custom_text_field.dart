@@ -30,7 +30,6 @@ class CustomTextField extends StatefulWidget {
     this.counterText,
     this.onChanged,
     this.hasIcon = false,
-    this.isPhoneNumber = false,
     this.isReadOnly = false,
     this.prefixText,
     this.showCursor = true,
@@ -45,6 +44,7 @@ class CustomTextField extends StatefulWidget {
     this.borderRadius,
     this.elevation = 0,
     this.onTap,
+    this.height = 44,
   });
 
   final String? hintText;
@@ -78,7 +78,6 @@ class CustomTextField extends StatefulWidget {
   final String? counterText;
   final onChanged;
   final bool hasIcon;
-  final bool isPhoneNumber;
   final bool isReadOnly;
   final bool autoFocus;
   final bool showEditableInput;
@@ -86,6 +85,7 @@ class CustomTextField extends StatefulWidget {
   final BorderRadius? borderRadius;
   final double elevation;
   final Function? onTap;
+  final double height;
 
   @override
   _TextFieldState createState() => _TextFieldState();
@@ -99,86 +99,78 @@ class _TextFieldState extends State<CustomTextField> {
       borderRadius: widget.borderRadius ?? BorderRadius.circular(30),
       elevation: widget.elevation,
       shadowColor: AppColor.primaryAppColor.withOpacity(0.5),
-      child: TextFormField(
-        onTap: () {
-          widget.onTap?.call();
-        },
-        initialValue: widget.initialValue,
-        showCursor: widget.showCursor,
-        maxLength: widget.textMaxLength,
-        readOnly: widget.isReadOnly,
-        autofocus: widget.autoFocus,
-        focusNode: widget.focusNode,
-        textAlign: widget.textAlign ?? TextAlign.start,
-        style: widget.isPhoneNumber
-            ? TextStyleS.s15w400().copyWith(
-                fontWeight: widget.showEditableInput
-                    ? FontWeight.w400
-                    : FontWeight.w100,
-              )
-            : (widget.style ??
-                TextStyle(
-                    fontSize: 14,
-                    fontWeight: widget.showEditableInput
-                        ? FontWeight.w500
-                        : FontWeight.w100)),
-        textInputAction: widget.inputAction,
-        controller: widget.controller,
-        enabled: widget.enabled,
-        inputFormatters: widget.inputFormatters,
-        textCapitalization: widget.textCapitalization,
-        onSaved: widget.onSaved,
-        minLines: widget.minLine,
-        maxLines: widget.maxLine,
-        validator: widget.validator,
-        onFieldSubmitted: widget.onFieldSubmitted,
-        keyboardType: widget.keyboardType,
-        onChanged: widget.onChanged,
-        decoration: InputDecoration(
-          enabledBorder: OutlineInputBorder(
-            borderRadius: widget.borderRadius ?? BorderRadius.circular(30.0),
-            borderSide: BorderSide(
-                width: 1,
-                color: AppColor.greyColor
-                    .withOpacity(widget.showEditableInput ? 1 : 0.5)),
+      child: SizedBox(
+        height: widget.height,
+        child: TextFormField(
+          onTap: () {
+            widget.onTap?.call();
+          },
+          initialValue: widget.initialValue,
+          showCursor: widget.showCursor,
+          maxLength: widget.textMaxLength,
+          readOnly: widget.isReadOnly,
+          autofocus: widget.autoFocus,
+          focusNode: widget.focusNode,
+          textAlign: widget.textAlign ?? TextAlign.start,
+          style: widget.style ??
+              TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          textInputAction: widget.inputAction,
+          controller: widget.controller,
+          enabled: widget.enabled,
+          inputFormatters: widget.inputFormatters,
+          textCapitalization: widget.textCapitalization,
+          onSaved: widget.onSaved,
+          minLines: widget.minLine,
+          maxLines: widget.maxLine,
+          validator: widget.validator,
+          onFieldSubmitted: widget.onFieldSubmitted,
+          keyboardType: widget.keyboardType,
+          onChanged: widget.onChanged,
+          decoration: InputDecoration(
+            enabledBorder: OutlineInputBorder(
+              borderRadius: widget.borderRadius ?? BorderRadius.circular(30.0),
+              borderSide: BorderSide(
+                  width: 1,
+                  color: AppColor.greyColor
+                      .withOpacity(widget.showEditableInput ? 1 : 0.5)),
+            ),
+            disabledBorder: OutlineInputBorder(
+              borderRadius: widget.borderRadius ?? BorderRadius.circular(30.0),
+              borderSide: BorderSide(
+                  width: 1,
+                  color: AppColor.greyColor.withOpacity(
+                      (widget.enabled! || widget.showEditableInput) ? 1 : 0.5)),
+            ),
+            prefixText: widget.prefixText ?? "",
+            prefixIcon: widget.prefixIcon ??
+                (widget.hasIcon ? const Icon(Icons.call) : null),
+            errorText: widget.errorValidate ? widget.errorText : null,
+            errorMaxLines: 2,
+            contentPadding: widget.contentPadding ?? const EdgeInsets.all(20),
+            counterText: widget.counterText,
+            border: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+              borderRadius: widget.borderRadius ?? BorderRadius.circular(30.0),
+            ),
+            suffixIconConstraints: widget.suffixIconConstraints ??
+                const BoxConstraints(minHeight: 24, minWidth: 38),
+            prefixIconConstraints: widget.prefixIconConstraints ??
+                const BoxConstraints(minHeight: 24, minWidth: 38),
+            filled: true,
+            fillColor: widget.backColor ?? Colors.white,
+            hintStyle: widget.hintStyle ??
+                TextStyleS.s12w500(color: AppColor.textGreyColor),
+            prefixStyle: widget.hintStyle ??
+                const TextStyle(
+                  fontSize: 16,
+                  letterSpacing: 0.2,
+                  color: AppColor.greyColor,
+                ),
+            hintText: widget.hintText,
+            labelStyle: TextStyleS.s15w500(),
+            helperText: widget.helperText,
+            suffixIcon: widget.suffixIcon,
           ),
-          disabledBorder: OutlineInputBorder(
-            borderRadius: widget.borderRadius ?? BorderRadius.circular(30.0),
-            borderSide: BorderSide(
-                width: 1,
-                color: AppColor.greyColor.withOpacity(
-                    (widget.enabled! || widget.showEditableInput) ? 1 : 0.5)),
-          ),
-          prefixText: widget.prefixText ?? "",
-          prefixIcon: widget.prefixIcon ??
-              (widget.hasIcon ? const Icon(Icons.call) : null),
-          errorText: widget.errorValidate ? widget.errorText : null,
-          errorMaxLines: 2,
-          contentPadding: widget.contentPadding ??
-              const EdgeInsets.fromLTRB(28.0, 22.0, 20.0, 22.0),
-          counterText: widget.counterText,
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
-            borderRadius: widget.borderRadius ?? BorderRadius.circular(30.0),
-          ),
-          suffixIconConstraints: widget.suffixIconConstraints ??
-              const BoxConstraints(minHeight: 24, minWidth: 38),
-          prefixIconConstraints: widget.prefixIconConstraints ??
-              const BoxConstraints(minHeight: 24, minWidth: 38),
-          filled: true,
-          fillColor: widget.backColor ?? Colors.white,
-          hintStyle: widget.hintStyle ??
-              TextStyleS.s12w500(color: AppColor.textGreyColor),
-          prefixStyle: widget.hintStyle ??
-              const TextStyle(
-                fontSize: 16,
-                letterSpacing: 0.2,
-                color: AppColor.greyColor,
-              ),
-          hintText: widget.hintText,
-          labelStyle: TextStyleS.s15w500(),
-          helperText: widget.helperText,
-          suffixIcon: widget.suffixIcon,
         ),
       ),
     );
