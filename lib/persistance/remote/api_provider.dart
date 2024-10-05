@@ -5,14 +5,17 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tedbook/main.dart';
 import 'package:tedbook/model/request/login_request.dart';
 import 'package:tedbook/model/request/put_order_request.dart';
 import 'package:tedbook/model/response/login_response.dart';
 import 'package:tedbook/model/response/order_response.dart';
 import 'package:tedbook/model/response/verify_sms_response.dart';
+import 'package:tedbook/pages/home/bloc/home_bloc.dart';
 import 'package:tedbook/persistance/service_locator.dart';
 import 'package:tedbook/persistance/user_data.dart';
 import 'package:tedbook/utils/utils.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'exceptions.dart';
 
 class ApiProvider {
@@ -126,8 +129,8 @@ class ApiProvider {
         _tokenRefreshQueue.removeFirst().complete(newToken);
       }
     } catch (error) {
-      // final context = MyApp.navigatorKey.currentContext;
-      // context?.read<MainBloc>().add(LogoutEvent());
+      final context = MyApp.navigatorKey.currentContext;
+      context?.read<HomeBloc>().add(LogoutEvent());
       while (_tokenRefreshQueue.isNotEmpty) {
         _tokenRefreshQueue.removeFirst().completeError(error);
       }
@@ -144,8 +147,8 @@ class ApiProvider {
       var url = '$authApi/refresh';
       var refreshToken = await _userData.refreshToken();
       debugLog(refreshToken);
-      final response = await _dio.post(url,
-          options: Options(headers: {"Cookie": "refreshToken=$refreshToken"}));
+      final response =
+          await _dio.post(url, data: {"refreshToken": refreshToken});
       debugLog(response.data);
 
       TokenData successResponse = TokenData.fromJson(response.data);
@@ -153,8 +156,6 @@ class ApiProvider {
         await _userData.saveAccessToken(successResponse.accessToken!);
         res = successResponse.accessToken;
       }
-    } catch (e) {
-      debugLog(e);
     } on FetchDataException {
       throw FetchDataException(message: "No Internet connection");
     }
@@ -179,7 +180,8 @@ class ApiProvider {
 
   Future<OrderResponse> getOrders(String userId) async {
     try {
-      final response = (await _dio.get("$baseUrl/api/orders/user/$userId")).data;
+      final response =
+          (await _dio.get("$baseUrl/api/orders/user/$userId")).data;
       return OrderResponse.fromJson(response);
     } catch (e) {
       debugLog("$e");
@@ -187,7 +189,7 @@ class ApiProvider {
     }
   }
 
-  Future<dynamic> putOrder(
+  Future<dynamic> orderCompletion(
       {required String orderId, required PutOrderRequest request}) async {
     try {
       final response = (await _dio.put(
@@ -202,4 +204,3 @@ class ApiProvider {
     }
   }
 }
-
