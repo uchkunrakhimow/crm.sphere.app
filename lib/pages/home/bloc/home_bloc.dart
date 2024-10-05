@@ -22,7 +22,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     });
     on<RefreshEvent>((_, __) => getOrders());
     on<SendCommentEvent>(sendComment);
-    on<PutOrderEvent>(putOrder);
+    on<OrderCompletionEvent>(orderCompletion);
     on<ChangeTypeEvent>((event, emit) =>
         emit(state.copyWith(selectedType: event.selectedTypeIndex)));
     on<LogoutEvent>(logout);
@@ -93,10 +93,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     });
   }
 
-  putOrder(PutOrderEvent event, Emitter<HomeState> emit) async {
+  orderCompletion(OrderCompletionEvent event, Emitter<HomeState> emit) async {
     PutOrderRequest request =
         PutOrderRequest(isArchive: true, status: event.status);
-    await _apiProvider.putOrder(orderId: event.orderId, request: request).then(
+    await _apiProvider.orderCompletion(orderId: event.orderId, request: request).then(
       (value) {
         emit(state.copyWith(status: BaseStatus.updated()));
         getOrders();

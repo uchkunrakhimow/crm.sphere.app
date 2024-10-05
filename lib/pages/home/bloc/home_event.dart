@@ -19,11 +19,11 @@ class SendCommentEvent extends HomeEvent {
   SendCommentEvent({required this.orderId});
 }
 
-class PutOrderEvent extends HomeEvent {
+class OrderCompletionEvent extends HomeEvent {
   final String orderId;
   final String status;
 
-  PutOrderEvent({required this.orderId, required this.status});
+  OrderCompletionEvent({required this.orderId, required this.status});
 }
 
 class LogoutEvent extends HomeEvent {}
