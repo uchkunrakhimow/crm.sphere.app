@@ -218,7 +218,7 @@ class MessageModel {
   MessageModel.fromJson(Map<String, dynamic> json) {
     commenterRole = json['commenterRole'];
     commentText = json['commentText'];
-    orderId = json['_id'];
+    orderId = json['orderId'];
     createdAt = json['createdAt'];
   }
 
@@ -226,7 +226,7 @@ class MessageModel {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['commenterRole'] = this.commenterRole;
     data['commentText'] = this.commentText;
-    data['_id'] = this.orderId;
+    data['orderId'] = this.orderId;
     data['createdAt'] = this.createdAt;
     return data;
   }

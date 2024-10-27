@@ -4,15 +4,17 @@ part of 'home_bloc.dart';
 class HomeState {
   final BaseStatus status;
   final int? selectedOrderType;
-  final List<OrderModel>? orders;
-  final List<OrderModel>? archives;
+  final List<OrderModel>? ordersList;
+  final List<OrderModel>? deliveredList;
+  final List<OrderModel>? canceledList;
   final String? sentOrderId;
 
   HomeState({
     required this.status,
     this.selectedOrderType,
-    this.orders,
-    this.archives,
+    this.ordersList,
+    this.deliveredList,
+    this.canceledList,
     this.sentOrderId,
   });
 
@@ -23,15 +25,17 @@ class HomeState {
   HomeState copyWith({
     BaseStatus? status,
     int? selectedOrderType,
-    List<OrderModel>? orders,
-    List<OrderModel>? archives,
+    List<OrderModel>? ordersList,
+    List<OrderModel>? deliveredList,
+    List<OrderModel>? canceledList,
     String? sentOrderId,
   }) {
     return HomeState(
       status: status ?? this.status,
       selectedOrderType: selectedOrderType ?? this.selectedOrderType,
-      orders: orders ?? this.orders,
-      archives: archives ?? this.archives,
+      ordersList: ordersList ?? this.ordersList,
+      deliveredList: deliveredList ?? this.deliveredList,
+      canceledList: canceledList ?? this.canceledList,
       sentOrderId: sentOrderId ?? this.sentOrderId,
     );
   }

@@ -8,6 +8,7 @@ import 'package:tedbook/persistance/base_status.dart';
 import 'package:tedbook/persistance/remote/api_provider.dart';
 import 'package:tedbook/persistance/service_locator.dart';
 import 'package:tedbook/persistance/user_data.dart';
+import 'package:tedbook/utils/order_status.dart';
 import 'package:tedbook/utils/utils.dart';
 
 part 'home_event.dart';
@@ -48,6 +49,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     socket.on('newComment', (newComment) {
       MessageModel newMessage = MessageModel.fromJson(newComment);
       List<OrderModel> list = [];
+      emit(state.copyWith(
+        sentOrderId: newMessage.orderId,
+      ));
       for (var element in _ordersList) {
         if (element.id == newMessage.orderId) {
           element.messages?.add(MessageModel.fromJson(newComment));
@@ -58,8 +62,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       debugLog("socket.on ${_ordersList.first.messages?.length}");
       emit(state.copyWith(
         status: BaseStatus.sent(),
-        orders: _ordersList,
-        sentOrderId: newMessage.orderId,
+        ordersList: _ordersList,
       ));
 
       // Handle new comment
@@ -73,20 +76,24 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       (value) {
         if (value.ordersList?.isNotEmpty == true) {
           _ordersList.clear();
-          _archivesList.clear();
+          _deliveredList.clear();
+          _canceledList.clear();
           for (var item in value.ordersList!) {
             commentControllers[item.id ?? ""] = TextEditingController();
             commentFocuses[item.id ?? ""] = FocusNode();
-            if (!(item.isArchive ?? false)) {
-              _archivesList.add(item);
-            } else {
+            if (getStatusType(item.status) == OrderStatus.pending) {
               _ordersList.add(item);
+            } else if (getStatusType(item.status) == OrderStatus.delivered) {
+              _deliveredList.add(item);
+            } else {
+              _canceledList.add(item);
             }
           }
           emit(state.copyWith(
             status: BaseStatus.success(),
-            orders: _ordersList,
-            archives: _archivesList,
+            ordersList: _ordersList,
+            deliveredList: _deliveredList,
+            canceledList: _canceledList,
           ));
         }
       },
@@ -105,7 +112,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     });
     PutOrderRequest request = PutOrderRequest(
       isArchive: true,
-      statusId: event.statusId,
+      statusId: event.status,
       payments: list,
     );
     await _apiProvider
@@ -149,7 +156,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       if (element.id == event.orderId) element.isExpanded = event.isExp;
       return;
     });
-    _archivesList.forEach((element) {
+    _deliveredList.forEach((element) {
       if (element.id == event.orderId) element.isExpanded = event.isExp;
       return;
     });
@@ -165,12 +172,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final UserData _userData = getInstance();
   late IO.Socket socket;
   List<OrderModel> _ordersList = [];
-  List<OrderModel> _archivesList = [];
+  List<OrderModel> _deliveredList = [];
+  List<OrderModel> _canceledList = [];
   var commentControllers = {};
   var commentFocuses = {};
   List<PaymentTypeModel> paymentTypes = [
-    PaymentTypeModel(method: "payment-systems"),
-    PaymentTypeModel(method: "card"),
-    PaymentTypeModel(method: "cash"),
+    PaymentTypeModel(name: "Платежные системы", method: "payment-systems"),
+    PaymentTypeModel(name: "Карта", method: "card"),
+    PaymentTypeModel(name: "Наличные", method: "cash"),
   ];
 }

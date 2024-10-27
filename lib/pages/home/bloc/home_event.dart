@@ -41,9 +41,9 @@ class IsExpandedEvent extends HomeEvent {
 
 class OrderCompletionEvent extends HomeEvent {
   final String orderId;
-  final String statusId;
+  final String status;
 
-  OrderCompletionEvent({required this.orderId, required this.statusId});
+  OrderCompletionEvent({required this.orderId, required this.status});
 }
 
 class LogoutEvent extends HomeEvent {}

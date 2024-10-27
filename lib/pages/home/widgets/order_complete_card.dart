@@ -2,23 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tedbook/pages/home/bloc/home_bloc.dart';
-import 'package:tedbook/pages/home/widgets/payment_type.dart';
 import 'package:tedbook/persistance/text_style_const.dart';
 import 'package:tedbook/utils/color_utils.dart';
 import 'package:tedbook/widgets/custom_button.dart';
 
 class OrderCompleteCard extends StatelessWidget {
   final String orderId;
-  final String? paymentType;
 
-  const OrderCompleteCard({super.key, required this.orderId, this.paymentType});
+  const OrderCompleteCard({super.key, required this.orderId});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        showConfirmOrderModal(context,
-            orderId: orderId, paymentType: paymentType);
+        showConfirmOrderModal(context, orderId: orderId);
       },
       child: Container(
         margin: EdgeInsets.zero,
@@ -49,7 +46,6 @@ class OrderCompleteCard extends StatelessWidget {
   showConfirmOrderModal(
     BuildContext context, {
     required String orderId,
-    String? paymentType,
   }) =>
       showModalBottomSheet(
         context: context,
@@ -73,16 +69,20 @@ class OrderCompleteCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildActionButton(
-                      context,
                       text: "Доставлен",
                       color: AppColor.primaryAppColor,
-                      statusId: "0",
+                      onTap: () => context.read<HomeBloc>().add(
+                            OrderCompletionEvent(
+                                orderId: orderId, status: "Delivered"),
+                          ),
                     ),
                     _buildActionButton(
-                      context,
                       text: "Клиент отказался",
                       color: AppColor.redColor,
-                      statusId: "1",
+                      onTap: () => context.read<HomeBloc>().add(
+                            OrderCompletionEvent(
+                                orderId: orderId, status: "Canceled"),
+                          ),
                     ),
                   ],
                 ),
@@ -93,11 +93,10 @@ class OrderCompleteCard extends StatelessWidget {
         },
       );
 
-  Widget _buildActionButton(
-    BuildContext context, {
+  Widget _buildActionButton({
     required String text,
     required Color color,
-    required String statusId,
+    required Function onTap,
   }) {
     return Flexible(
       child: CustomButton(
@@ -106,9 +105,9 @@ class OrderCompleteCard extends StatelessWidget {
         height: 50,
         textStyle: TextStyleS.s14w600(color: Colors.white),
         backColor: color,
-        onTap: () => context.read<HomeBloc>().add(
-              OrderCompletionEvent(orderId: orderId, statusId: statusId),
-            ),
+        onTap: () {
+          onTap.call();
+        },
       ),
     );
   }

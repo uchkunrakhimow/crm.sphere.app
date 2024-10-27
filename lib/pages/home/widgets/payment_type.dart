@@ -63,7 +63,7 @@ class PaymentTypeItem extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  model.method ?? "-",
+                  model.name ?? "-",
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
