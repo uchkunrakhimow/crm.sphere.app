@@ -7,10 +7,10 @@ class InitEvent extends HomeEvent {}
 
 class RefreshEvent extends HomeEvent {}
 
-class ChangeTypeEvent extends HomeEvent {
+class ChangeOrderTypeEvent extends HomeEvent {
   final int selectedTypeIndex;
 
-  ChangeTypeEvent({required this.selectedTypeIndex});
+  ChangeOrderTypeEvent({required this.selectedTypeIndex});
 }
 
 class SendCommentEvent extends HomeEvent {
@@ -19,11 +19,31 @@ class SendCommentEvent extends HomeEvent {
   SendCommentEvent({required this.orderId});
 }
 
+class InputAmountEvent extends HomeEvent {
+  final String method;
+  final double amount;
+
+  InputAmountEvent({
+    required this.method,
+    required this.amount,
+  });
+}
+
+class IsExpandedEvent extends HomeEvent {
+  final String orderId;
+  final bool isExp;
+
+  IsExpandedEvent({
+    required this.orderId,
+    required this.isExp,
+  });
+}
+
 class OrderCompletionEvent extends HomeEvent {
   final String orderId;
-  final String status;
+  final String statusId;
 
-  OrderCompletionEvent({required this.orderId, required this.status});
+  OrderCompletionEvent({required this.orderId, required this.statusId});
 }
 
 class LogoutEvent extends HomeEvent {}

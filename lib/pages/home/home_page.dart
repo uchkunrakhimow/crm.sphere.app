@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:tedbook/pages/home/bloc/home_bloc.dart';
 import 'package:tedbook/pages/home/widgets/orders.dart';
@@ -9,7 +10,6 @@ import 'package:tedbook/persistance/base_status.dart';
 import 'package:tedbook/persistance/text_style_const.dart';
 import 'package:tedbook/utils/color_utils.dart';
 import 'package:tedbook/utils/navigator_extension.dart';
-import 'package:tedbook/utils/utils.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -44,20 +44,45 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  Widget get _mainUi => SafeArea(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Column(
-        children: [
-          _appBar,
-          SizedBox(height: 22),
-          _tabBarField,
-          SizedBox(height: 22),
-          _tabBarViewField,
-        ],
-      ),
-    ),
-  );
+  Widget get _mainUi => BlocListener<HomeBloc, HomeState>(
+        listenWhen: (_, c) =>
+            c.status.type == StatusType.logout ||
+            c.status.type == StatusType.sent ||
+            c.status.type == StatusType.updated ||
+            c.status.type == StatusType.error,
+        listener: (_, HomeState state) {
+          if (state.status.type == StatusType.logout) {
+            pushAndRemoveAllWithBloc(LoginPage(), LoginBloc());
+          } else if (state.status.type == StatusType.sent) {
+            bloc.commentControllers[state.sentOrderId].clear();
+            bloc.commentFocuses[state.sentOrderId].unfocus();
+          } else if (state.status.type == StatusType.updated) {
+            pop();
+          } else if (state.status.type == StatusType.error) {
+            showToast(
+              state.status.message?.text ?? "",
+              context: context,
+              animation: StyledToastAnimation.scale,
+              backgroundColor: Colors.red,
+              position: StyledToastPosition(align: Alignment.topCenter),
+            );
+          }
+        },
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              children: [
+                _appBar,
+                SizedBox(height: 22),
+                _tabBarField,
+                SizedBox(height: 22),
+                _tabBarViewField,
+              ],
+            ),
+          ),
+        ),
+      );
 
   Widget get _appBar => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -85,7 +110,7 @@ class _HomePageState extends State<HomePage>
 
   Widget get _tabBarField => BlocBuilder<HomeBloc, HomeState>(
         buildWhen: (previous, current) =>
-            previous.selectedType != current.selectedType,
+            previous.selectedOrderType != current.selectedOrderType,
         builder: (context, state) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -94,19 +119,19 @@ class _HomePageState extends State<HomePage>
               children: [
                 _tabBarItem(
                   title: "Заявки",
-                  isSelected: state.selectedType == 0,
+                  isSelected: state.selectedOrderType == 0,
                   onTap: () {
                     _tabController.animateTo(0);
-                    bloc.add(ChangeTypeEvent(selectedTypeIndex: 0));
+                    bloc.add(ChangeOrderTypeEvent(selectedTypeIndex: 0));
                   },
                 ),
                 SizedBox(width: 16),
                 _tabBarItem(
                   title: "Архив",
-                  isSelected: state.selectedType == 1,
+                  isSelected: state.selectedOrderType == 1,
                   onTap: () {
                     _tabController.animateTo(1);
-                    bloc.add(ChangeTypeEvent(selectedTypeIndex: 1));
+                    bloc.add(ChangeOrderTypeEvent(selectedTypeIndex: 1));
                   },
                 ),
               ],
@@ -116,34 +141,13 @@ class _HomePageState extends State<HomePage>
       );
 
   Widget get _tabBarViewField => Expanded(
-        child: BlocConsumer<HomeBloc, HomeState>(
-          listenWhen: (_, c) =>
-              c.status.type == StatusType.paging ||
-              c.status.type == StatusType.sent ||
-              c.status.type == StatusType.updated,
-          listener: (_, HomeState state) {
-            if (state.status.type == StatusType.paging) {
-              pushAndRemoveAllWithBloc(LoginPage(), LoginBloc());
-            } else if (state.status.type == StatusType.sent) {
-              bloc.commentControllers[state.sentOrderId].clear();
-              bloc.commentFocuses[state.sentOrderId].unfocus();
-            } else if (state.status.type == StatusType.updated) {
-              pop();
-            }
-          },
-          buildWhen: (previous, current) =>
-              previous.selectedType != current.selectedType,
-          builder: (context, state) {
-            debugLog(state.orders?.length);
-            return TabBarView(
-              controller: _tabController,
-              physics: NeverScrollableScrollPhysics(),
-              children: [
-                OrdersWidget(isArchive: false),
-                OrdersWidget(isArchive: true),
-              ],
-            );
-          },
+        child: TabBarView(
+          controller: _tabController,
+          physics: NeverScrollableScrollPhysics(),
+          children: [
+            OrdersWidget(isArchive: false),
+            OrdersWidget(isArchive: true),
+          ],
         ),
       );
 }

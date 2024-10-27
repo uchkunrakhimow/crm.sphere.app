@@ -94,7 +94,8 @@ class ApiProvider {
   // Don't use create or default constructor. Use getInstance() method to get ApiProvider object
   factory ApiProvider.create() => ApiProvider._();
 
-  static const baseUrl = 'https://techdev.uz';
+  // static const baseUrl = 'http://api.techdev.uz';
+  static const baseUrl = 'https://api.tedbookcrm.uz';
 
   static const authApi = '$baseUrl/auth';
 
@@ -174,18 +175,17 @@ class ApiProvider {
       return LoginResponse.fromJson(response);
     } catch (e) {
       debugLog("FetchDataException: $e");
-      throw Exception(e);
+      throw FetchDataException(message: e);
     }
   }
 
   Future<OrderResponse> getOrders(String userId) async {
     try {
-      final response =
-          (await _dio.get("$baseUrl/api/orders/user/$userId")).data;
+      final response = (await _dio.get("$baseUrl/api/order/user/$userId")).data;
       return OrderResponse.fromJson(response);
     } catch (e) {
       debugLog("$e");
-      throw FetchDataException(message: e.toString());
+      throw FetchDataException(message: e);
     }
   }
 
@@ -193,14 +193,38 @@ class ApiProvider {
       {required String orderId, required PutOrderRequest request}) async {
     try {
       final response = (await _dio.put(
-        "$baseUrl/api/courier/orders/$orderId",
+        "$baseUrl/api/order/$orderId",
         data: request.toJson(),
       ))
           .data;
       return response;
     } catch (e) {
       debugLog("$e");
-      throw FetchDataException(message: e.toString());
+      throw FetchDataException(message: e);
     }
   }
+
+  // Future<PaymentTypesResponse> getPaymentsType() async {
+  //   try {
+  //     final response = (await _dio.get("$baseUrl/api/paymentsType")).data;
+  //     return PaymentTypesResponse.fromJson(response);
+  //   } catch (e) {
+  //     debugLog("$e");
+  //     throw FetchDataException(message: e);
+  //   }
+  // }
+  //
+  // Future<List<StatusModel>> getStatuses() async {
+  //   try {
+  //     final response = (await _dio.get("$baseUrl/api/status/v1")).data;
+  //     List<StatusModel> list = [];
+  //     for (var item in response) {
+  //       list.add(StatusModel.fromJson(item));
+  //     }
+  //     return list;
+  //   } catch (e) {
+  //     debugLog("$e");
+  //     throw FetchDataException(message: e);
+  //   }
+  // }
 }

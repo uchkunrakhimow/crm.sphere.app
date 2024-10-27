@@ -3,14 +3,14 @@ part of 'home_bloc.dart';
 @immutable
 class HomeState {
   final BaseStatus status;
-  final int? selectedType;
+  final int? selectedOrderType;
   final List<OrderModel>? orders;
   final List<OrderModel>? archives;
   final String? sentOrderId;
 
   HomeState({
     required this.status,
-    this.selectedType,
+    this.selectedOrderType,
     this.orders,
     this.archives,
     this.sentOrderId,
@@ -22,14 +22,14 @@ class HomeState {
 
   HomeState copyWith({
     BaseStatus? status,
-    int? selectedType,
+    int? selectedOrderType,
     List<OrderModel>? orders,
     List<OrderModel>? archives,
     String? sentOrderId,
   }) {
     return HomeState(
       status: status ?? this.status,
-      selectedType: selectedType ?? this.selectedType,
+      selectedOrderType: selectedOrderType ?? this.selectedOrderType,
       orders: orders ?? this.orders,
       archives: archives ?? this.archives,
       sentOrderId: sentOrderId ?? this.sentOrderId,

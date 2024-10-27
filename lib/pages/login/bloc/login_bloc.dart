@@ -40,9 +40,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
           }
         },
-      ).catchError((e) {
-        emit(state.copyWith(
-            loginStatus: BaseStatus.errorWithString(message: e.message)));
+      ).onError((err, __) {
+        emit(
+          state.copyWith(
+              loginStatus: BaseStatus.errorWithString(message: err.toString())),
+        );
       });
     }
   }

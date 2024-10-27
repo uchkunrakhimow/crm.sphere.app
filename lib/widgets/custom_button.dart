@@ -85,17 +85,19 @@ class CustomButton extends StatelessWidget {
                       ),
                     if (leadingIcon == null && isLoading)
                       const SizedBox(width: 25),
-                    Text(
-                      text ?? "",
-                      style: textStyle ??
-                          TextStyle(
-                            fontSize: fontSize,
-                            color: textColor ?? Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    Flexible(
+                      child: Text(
+                        text ?? "",
+                        style: textStyle ??
+                            TextStyle(
+                              fontSize: fontSize,
+                              color: textColor ?? Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     if (trailingIcon != null)
                       Padding(

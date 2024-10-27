@@ -9,6 +9,7 @@ enum StatusType {
   sending,
   sent,
   updated,
+  logout,
   error,
 }
 
@@ -77,6 +78,12 @@ class BaseStatus {
   factory BaseStatus.updated() {
     return BaseStatus(
       type: StatusType.updated,
+    );
+  }
+
+  factory BaseStatus.logout() {
+    return BaseStatus(
+      type: StatusType.logout,
     );
   }
 

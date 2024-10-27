@@ -1,4 +1,4 @@
-import 'package:tedbook/utils/constant.dart';
+import 'package:tedbook/utils/utils.dart';
 
 class CustomException implements Exception {
   final message;
@@ -13,8 +13,8 @@ class CustomException implements Exception {
 }
 
 class FetchDataException extends CustomException {
-  FetchDataException({String? message})
-      : super(message ?? SERVER_ERROR, "Error During Communication: ");
+  FetchDataException({dynamic message})
+      : super(getErrorMessage(message), "");
 }
 
 class BadRequestException extends CustomException {

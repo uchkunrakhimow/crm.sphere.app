@@ -1,8 +1,10 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 
 debugLog(dynamic s) {
   if (kDebugMode) log(s.toString());
@@ -32,6 +34,18 @@ extension BuildContextX on BuildContext {
       SnackBar(content: content),
     );
   }
+}
+
+String getErrorMessage(error) {
+  String errorMessage = "";
+  if (error is DioException && error.response != null) {
+    try {
+      errorMessage = error.response!.data!["message"].toString();
+    } catch (e) {
+      debugLog("getErrorMessage $e");
+    }
+  }
+  return errorMessage;
 }
 
 int osType() {

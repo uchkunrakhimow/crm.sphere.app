@@ -22,8 +22,9 @@ dependencies:
   firebase_core: ^3.5.0
   firebase_messaging: ^15.1.2
   logger: ^2.4.0
-#  web_socket_channel: ^2.4.0
   socket_io_client: ^2.0.3+1
+  url_launcher: ^6.3.1
+  flutter_styled_toast: ^2.2.1
 
 dev_dependencies:
   flutter_test:

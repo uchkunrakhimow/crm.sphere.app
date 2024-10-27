@@ -5,7 +5,6 @@ import 'package:tedbook/pages/home/bloc/home_bloc.dart';
 import 'package:tedbook/pages/home/widgets/payment_type.dart';
 import 'package:tedbook/persistance/text_style_const.dart';
 import 'package:tedbook/utils/color_utils.dart';
-import 'package:tedbook/utils/utils.dart';
 import 'package:tedbook/widgets/custom_button.dart';
 
 class OrderCompleteCard extends StatelessWidget {
@@ -18,7 +17,7 @@ class OrderCompleteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        _showConfirmOrderModal(context,
+        showConfirmOrderModal(context,
             orderId: orderId, paymentType: paymentType);
       },
       child: Container(
@@ -46,58 +45,71 @@ class OrderCompleteCard extends StatelessWidget {
       ),
     );
   }
-}
 
-_showConfirmOrderModal(BuildContext context,
-        {required String orderId, String? paymentType}) =>
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      backgroundColor: Colors.transparent,
-      builder: (_) {
-        debugLog("_showConfirmOrderModal");
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PaymentTypeCard(paymentType: paymentType),
-            SizedBox(height: 16),
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 36, horizontal: 12),
-              // width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Flexible(
-                    child: CustomButton(
+  showConfirmOrderModal(
+    BuildContext context, {
+    required String orderId,
+    String? paymentType,
+  }) =>
+      showModalBottomSheet(
+        context: context,
+        enableDrag: false,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        backgroundColor: Colors.transparent,
+        builder: (_) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 36, horizontal: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildActionButton(
+                      context,
                       text: "Доставлен",
-                      height: 50,
-                      textStyle: TextStyleS.s14w600(color: Colors.white),
-                      onTap: () => context.read<HomeBloc>().add(
-                          OrderCompletionEvent(orderId: orderId, status: "delivered")),
+                      color: AppColor.primaryAppColor,
+                      statusId: "0",
                     ),
-                  ),
-                  SizedBox(width: 16),
-                  Flexible(
-                      child: CustomButton(
-                    text: "Клиент отказался",
-                    height: 50,
-                    textStyle: TextStyleS.s14w600(color: Colors.white),
-                    backColor: AppColor.redColor,
-                    onTap: () => context.read<HomeBloc>().add(
-                        OrderCompletionEvent(orderId: orderId, status: "decline")),
-                  )),
-                ],
+                    _buildActionButton(
+                      context,
+                      text: "Клиент отказался",
+                      color: AppColor.redColor,
+                      statusId: "1",
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
               ),
-              alignment: Alignment.center,
+            ],
+          );
+        },
+      );
+
+  Widget _buildActionButton(
+    BuildContext context, {
+    required String text,
+    required Color color,
+    required String statusId,
+  }) {
+    return Flexible(
+      child: CustomButton(
+        margin: EdgeInsets.symmetric(horizontal: 8),
+        text: text,
+        height: 50,
+        textStyle: TextStyleS.s14w600(color: Colors.white),
+        backColor: color,
+        onTap: () => context.read<HomeBloc>().add(
+              OrderCompletionEvent(orderId: orderId, statusId: statusId),
             ),
-          ],
-        );
-      },
+      ),
     );
+  }
+}

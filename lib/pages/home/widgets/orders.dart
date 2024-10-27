@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:tedbook/model/response/order_response.dart';
 import 'package:tedbook/pages/home/bloc/home_bloc.dart';
 import 'package:tedbook/pages/home/widgets/messages.dart';
 import 'package:tedbook/pages/home/widgets/contacts_card.dart';
 import 'package:tedbook/pages/home/widgets/order_complete_card.dart';
+import 'package:tedbook/pages/home/widgets/payment_type.dart';
 import 'package:tedbook/pages/home/widgets/send_message.dart';
 import 'package:tedbook/persistance/base_status.dart';
 import 'package:tedbook/persistance/text_style_const.dart';
@@ -20,7 +22,9 @@ class OrdersWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
       buildWhen: (p, c) =>
-          p.status.type != c.status.type || c.status.type == StatusType.sent,
+          p.status.type != c.status.type ||
+          c.status.type == StatusType.sent ||
+          c.status.type == StatusType.paging,
       builder: (_, state) {
         if (state.status.type == StatusType.loading)
           return Center(child: CircularProgressIndicator());
@@ -36,11 +40,12 @@ class OrdersWidget extends StatelessWidget {
               itemBuilder: (_, int index) {
                 OrderModel order =
                     isArchive ? state.archives![index] : state.orders![index];
-                return _orderItem(
+                return _orderItem(context,
                     isArchive: isArchive, order: order, index: index + 1);
               },
               separatorBuilder: (_, __) => SizedBox(height: 8),
-              itemCount: isArchive ? state.archives!.length : state.orders!.length,
+              itemCount:
+                  isArchive ? state.archives!.length : state.orders!.length,
             ),
           );
         else {
@@ -56,9 +61,12 @@ class OrdersWidget extends StatelessWidget {
   }
 
   _orderItem(
-      {required bool isArchive,
-      required OrderModel order,
-      required int index}) {
+    BuildContext context, {
+    required bool isArchive,
+    required OrderModel order,
+    required int index,
+  }) {
+    Logger().w(order.isExpanded);
     return Column(
       children: [
         Container(
@@ -67,6 +75,11 @@ class OrdersWidget extends StatelessWidget {
             color: Colors.white,
           ),
           child: ExpansionTile(
+            onExpansionChanged: (val) {
+              context
+                  .read<HomeBloc>()
+                  .add(IsExpandedEvent(orderId: order.id ?? "", isExp: val));
+            },
             leading: Text(
               "${index < 10 ? "0$index" : "$index"}",
               style: TextStyleS.s14w600(color: AppColor.textGreyColor),
@@ -88,12 +101,16 @@ class OrdersWidget extends StatelessWidget {
                 child: Stack(
                   children: [
                     if (!isArchive)
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: OrderCompleteCard(
-                          orderId: order.id ?? "",
-                          paymentType: order.paymentType,
-                        ),
+                      BlocBuilder<HomeBloc, HomeState>(
+                        builder: (_, state) {
+                          return Align(
+                            alignment: Alignment.bottomCenter,
+                            child: OrderCompleteCard(
+                              orderId: order.id ?? "",
+                              paymentType: order.paymentType?.first.method,
+                            ),
+                          );
+                        },
                       ),
                     Align(
                       alignment: Alignment.topCenter,
@@ -112,6 +129,8 @@ class OrdersWidget extends StatelessWidget {
             ],
           ),
         ),
+        SizedBox(height: 16),
+        if (order.isExpanded ?? false) PaymentTypeCard(),
       ],
     );
   }

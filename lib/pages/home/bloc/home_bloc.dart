@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:tedbook/model/request/put_order_request.dart';
 import 'package:tedbook/model/response/order_response.dart';
+import 'package:tedbook/model/response/payment_type_model.dart';
 import 'package:tedbook/persistance/base_status.dart';
 import 'package:tedbook/persistance/remote/api_provider.dart';
 import 'package:tedbook/persistance/service_locator.dart';
@@ -15,17 +16,21 @@ part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc() : super(HomeState.initial()) {
-    on<InitEvent>((event, emit) {
-      emit(state.copyWith(selectedType: 0));
-      socketInit();
-      getOrders();
-    });
+    on<InitEvent>((event, emit) => initEvent());
     on<RefreshEvent>((_, __) => getOrders());
     on<SendCommentEvent>(sendComment);
     on<OrderCompletionEvent>(orderCompletion);
-    on<ChangeTypeEvent>((event, emit) =>
-        emit(state.copyWith(selectedType: event.selectedTypeIndex)));
+    on<ChangeOrderTypeEvent>((event, emit) =>
+        emit(state.copyWith(selectedOrderType: event.selectedTypeIndex)));
+    on<InputAmountEvent>(inputAmount);
+    on<IsExpandedEvent>(expandedOrder);
     on<LogoutEvent>(logout);
+  }
+
+  initEvent() {
+    emit(state.copyWith(selectedOrderType: 0));
+    socketInit();
+    getOrders();
   }
 
   socketInit() async {
@@ -72,7 +77,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           for (var item in value.ordersList!) {
             commentControllers[item.id ?? ""] = TextEditingController();
             commentFocuses[item.id ?? ""] = FocusNode();
-            if (item.isArchive ?? false) {
+            if (!(item.isArchive ?? false)) {
               _archivesList.add(item);
             } else {
               _ordersList.add(item);
@@ -94,14 +99,28 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   orderCompletion(OrderCompletionEvent event, Emitter<HomeState> emit) async {
-    PutOrderRequest request =
-        PutOrderRequest(isArchive: true, status: event.status);
-    await _apiProvider.orderCompletion(orderId: event.orderId, request: request).then(
+    var list = <PaymentTypeModel>[];
+    paymentTypes.forEach((element) {
+      if (element.amount != null) list.add(element);
+    });
+    PutOrderRequest request = PutOrderRequest(
+      isArchive: true,
+      statusId: event.statusId,
+      payments: list,
+    );
+    await _apiProvider
+        .orderCompletion(orderId: event.orderId, request: request)
+        .then(
       (value) {
         emit(state.copyWith(status: BaseStatus.updated()));
         getOrders();
       },
-    );
+    ).onError((err, __) {
+      emit(
+        state.copyWith(
+            status: BaseStatus.errorWithString(message: err.toString())),
+      );
+    });
   }
 
   sendComment(SendCommentEvent event, Emitter<HomeState> emit) {
@@ -115,9 +134,31 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     });
   }
 
+  inputAmount(InputAmountEvent event, Emitter<HomeState> emit) async {
+    paymentTypes.forEach((element) {
+      if (element.method == event.method) {
+        element.amount = event.amount;
+        return;
+      }
+    });
+    emit(state.copyWith(status: BaseStatus.paging()));
+  }
+
+  expandedOrder(IsExpandedEvent event, Emitter<HomeState> emit) async {
+    _ordersList.forEach((element) {
+      if (element.id == event.orderId) element.isExpanded = event.isExp;
+      return;
+    });
+    _archivesList.forEach((element) {
+      if (element.id == event.orderId) element.isExpanded = event.isExp;
+      return;
+    });
+    emit(state.copyWith(status: BaseStatus.paging()));
+  }
+
   logout(LogoutEvent event, Emitter<HomeState> emit) async {
     await _userData.clearAllData();
-    emit(state.copyWith(status: BaseStatus.paging()));
+    emit(state.copyWith(status: BaseStatus.logout()));
   }
 
   final ApiProvider _apiProvider = getInstance();
@@ -127,4 +168,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   List<OrderModel> _archivesList = [];
   var commentControllers = {};
   var commentFocuses = {};
+  List<PaymentTypeModel> paymentTypes = [
+    PaymentTypeModel(method: "payment-systems"),
+    PaymentTypeModel(method: "card"),
+    PaymentTypeModel(method: "cash"),
+  ];
 }
