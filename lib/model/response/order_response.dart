@@ -1,24 +1,51 @@
 class OrderResponse {
   String? message;
-  List<OrderModel>? ordersList;
+  Data? data;
 
-  OrderResponse({this.message, this.ordersList});
+  OrderResponse({this.message, this.data});
 
   OrderResponse.fromJson(Map<String, dynamic> json) {
     message = json['message'];
-    if (json['data'] != null) {
+    data = json['data'] != null ? Data.fromJson(json['data']) : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['message'] = this.message;
+    if (this.data != null) {
+      data['data'] = this.data!.toJson();
+    }
+    return data;
+  }
+}
+
+class Data {
+  int? total;
+  int? page;
+  int? totalPages;
+  List<OrderModel>? ordersList;
+
+  Data({this.total, this.page, this.totalPages, this.ordersList});
+
+  Data.fromJson(Map<String, dynamic> json) {
+    total = json['total'];
+    page = json['page'];
+    totalPages = json['totalPages'];
+    if (json['orders'] != null) {
       ordersList = <OrderModel>[];
-      json['data'].forEach((v) {
-        ordersList!.add(new OrderModel.fromJson(v));
+      json['orders'].forEach((v) {
+        ordersList!.add(OrderModel.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['message'] = this.message;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['total'] = this.total;
+    data['page'] = this.page;
+    data['totalPages'] = this.totalPages;
     if (this.ordersList != null) {
-      data['data'] = this.ordersList!.map((v) => v.toJson()).toList();
+      data['orders'] = this.ordersList!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -36,11 +63,12 @@ class OrderModel {
   List<ProductsIds>? productsIds;
   String? region;
   String? address;
-  List<Payments>? paymentType;
   bool? isArchive;
   List<MessageModel>? messages;
+  List<Payments>? payments;
   String? createdAt;
   String? updatedAt;
+  List<EditHistory>? editHistory;
   bool? isExpanded;
 
   OrderModel({
@@ -55,24 +83,25 @@ class OrderModel {
     this.productsIds,
     this.region,
     this.address,
-    this.paymentType,
     this.isArchive,
     this.messages,
+    this.payments,
     this.createdAt,
     this.updatedAt,
+    this.editHistory,
     this.isExpanded,
   });
 
   OrderModel.fromJson(Map<String, dynamic> json) {
     id = json['_id'];
     operatorId = json['operatorId'] != null
-        ? new OperatorId.fromJson(json['operatorId'])
+        ? OperatorId.fromJson(json['operatorId'])
         : null;
     courierId = json['courierId'] != null
-        ? new OperatorId.fromJson(json['courierId'])
+        ? OperatorId.fromJson(json['courierId'])
         : null;
     logisticianId = json['logisticianId'] != null
-        ? new OperatorId.fromJson(json['logisticianId'])
+        ? OperatorId.fromJson(json['logisticianId'])
         : null;
     fullName = json['fullName'];
     phoneNumber = json['phoneNumber'];
@@ -81,30 +110,36 @@ class OrderModel {
     if (json['productsIds'] != null) {
       productsIds = <ProductsIds>[];
       json['productsIds'].forEach((v) {
-        productsIds!.add(new ProductsIds.fromJson(v));
+        productsIds!.add(ProductsIds.fromJson(v));
       });
     }
     region = json['region'];
     address = json['address'];
-    if (json['payments'] != null) {
-      paymentType = <Payments>[];
-      json['payments'].forEach((v) {
-        paymentType!.add(new Payments.fromJson(v));
-      });
-    }
     isArchive = json['is_archive'];
     if (json['messages'] != null) {
       messages = <MessageModel>[];
       json['messages'].forEach((v) {
-        messages!.add(new MessageModel.fromJson(v));
+        messages!.add(MessageModel.fromJson(v));
+      });
+    }
+    if (json['payments'] != null) {
+      payments = <Payments>[];
+      json['payments'].forEach((v) {
+        payments!.add(Payments.fromJson(v));
       });
     }
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
+    if (json['editHistory'] != null) {
+      editHistory = <EditHistory>[];
+      json['editHistory'].forEach((v) {
+        editHistory!.add(EditHistory.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['_id'] = this.id;
     if (this.operatorId != null) {
       data['operatorId'] = this.operatorId!.toJson();
@@ -124,15 +159,18 @@ class OrderModel {
     }
     data['region'] = this.region;
     data['address'] = this.address;
-    if (this.paymentType != null) {
-      data['payments'] = this.paymentType!.map((v) => v.toJson()).toList();
-    }
     data['is_archive'] = this.isArchive;
     if (this.messages != null) {
       data['messages'] = this.messages!.map((v) => v.toJson()).toList();
     }
+    if (this.payments != null) {
+      data['payments'] = this.payments!.map((v) => v.toJson()).toList();
+    }
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
+    if (this.editHistory != null) {
+      data['editHistory'] = this.editHistory!.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }
@@ -151,7 +189,7 @@ class OperatorId {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['_id'] = this.id;
     data['name'] = this.name;
     data['username'] = this.username;
@@ -175,7 +213,7 @@ class ProductsIds {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['_id'] = this.id;
     data['title'] = this.title;
     data['price'] = this.price;
@@ -198,9 +236,37 @@ class Payments {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['method'] = this.method;
     data['amount'] = this.amount;
+    data['_id'] = this.id;
+    return data;
+  }
+}
+
+class EditHistory {
+  OperatorId? editorId;
+  String? editTime;
+  double? editDuration;
+  String? id;
+
+  EditHistory({this.editorId, this.editTime, this.editDuration, this.id});
+
+  EditHistory.fromJson(Map<String, dynamic> json) {
+    editorId =
+        json['editorId'] != null ? OperatorId.fromJson(json['editorId']) : null;
+    editTime = json['editTime'];
+    editDuration = json['editDuration'];
+    id = json['_id'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    if (this.editorId != null) {
+      data['editorId'] = this.editorId!.toJson();
+    }
+    data['editTime'] = this.editTime;
+    data['editDuration'] = this.editDuration;
     data['_id'] = this.id;
     return data;
   }
@@ -223,7 +289,7 @@ class MessageModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['commenterRole'] = this.commenterRole;
     data['commentText'] = this.commentText;
     data['orderId'] = this.orderId;

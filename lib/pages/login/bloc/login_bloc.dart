@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:tedbook/model/request/login_request.dart';
 import 'package:tedbook/persistance/base_status.dart';
 import 'package:tedbook/persistance/remote/api_provider.dart';
@@ -26,18 +27,28 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           loginStatus: BaseStatus.errorWithString(
               message: "password bo'sh bo'lishi mumkin emas")));
     } else {
-      LoginRequest request = LoginRequest(
-          username: _usernameCtrl.text, password: _passwordCtrl.text);
+      var request = LoginRequest(
+        username: _usernameCtrl.text,
+        password: _passwordCtrl.text,
+      );
       emit(state.copyWith(loginStatus: BaseStatus.loading()));
       await _apiProvider.login(request).then(
         (value) async {
-          if (value.tokens != null) {
+          Logger().w(value.user?.toJson());
+          if (value.user?.role != "courier") {
+            Logger().wtf(value.user?.role);
+
+            emit(
+              state.copyWith(
+                  loginStatus: BaseStatus.errorWithString(
+                      message: "Пользователь не найден")),
+            );
+          } else if (value.tokens != null) {
             await _userData.saveGeneralToken(value.tokens!);
             await _userData.saveGeneralUserData(value.user!);
             emit(state.copyWith(loginStatus: BaseStatus.success()));
           } else {
             debugLog("catchError: $value");
-
           }
         },
       ).onError((err, __) {

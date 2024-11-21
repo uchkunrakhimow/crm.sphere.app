@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:tedbook/model/request/firebasetoken_request.dart';
 import 'package:tedbook/model/request/put_order_request.dart';
 import 'package:tedbook/model/response/order_response.dart';
 import 'package:tedbook/model/response/payment_type_model.dart';
 import 'package:tedbook/persistance/base_status.dart';
+import 'package:tedbook/persistance/firebase_service.dart';
 import 'package:tedbook/persistance/remote/api_provider.dart';
 import 'package:tedbook/persistance/service_locator.dart';
 import 'package:tedbook/persistance/user_data.dart';
@@ -30,8 +33,26 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   initEvent() {
     emit(state.copyWith(selectedOrderType: 0));
+    FirebaseService().firebaseInit();
+    setFirebaseToken();
     socketInit();
     getOrders();
+  }
+
+  setFirebaseToken() async {
+    String token = await FirebaseService().getToken();
+    String userId = await _userData.userId() ?? "";
+    FirebaseTokenRequest request = FirebaseTokenRequest(
+      userId: userId,
+      token: token,
+    );
+    await _apiProvider.setFirebaseToken(request).then((value) {
+      debugLog(value);
+    }).onError(
+      (err, _) {
+        debugLog(err);
+      },
+    );
   }
 
   socketInit() async {
@@ -45,8 +66,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           .build(),
     );
 
+    // Listen for new orders
+    socket.on('orderUpdated', (newOrder) {
+      getOrders();
+    });
+
     // Listen for new comments
     socket.on('newComment', (newComment) {
+      Logger().w(newComment);
       MessageModel newMessage = MessageModel.fromJson(newComment);
       List<OrderModel> list = [];
       emit(state.copyWith(
@@ -74,11 +101,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(status: BaseStatus.loading()));
     await _apiProvider.getOrders(await _userData.userId() ?? "").then(
       (value) {
-        if (value.ordersList?.isNotEmpty == true) {
+        if (value.data?.ordersList?.isNotEmpty == true) {
           _ordersList.clear();
           _deliveredList.clear();
           _canceledList.clear();
-          for (var item in value.ordersList!) {
+          for (var item in value.data!.ordersList!) {
             commentControllers[item.id ?? ""] = TextEditingController();
             commentFocuses[item.id ?? ""] = FocusNode();
             if (getStatusType(item.status) == OrderStatus.pending) {
@@ -98,6 +125,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         }
       },
     ).onError((err, __) {
+      Logger().e(err);
       emit(
         state.copyWith(
             status: BaseStatus.errorWithString(message: err.toString())),

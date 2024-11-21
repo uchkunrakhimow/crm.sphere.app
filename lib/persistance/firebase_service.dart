@@ -1,36 +1,39 @@
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart';
-// import 'package:tedbook/utils/utils.dart';
-//
-// class FirebaseService{
-//  setPresentationOptions() async {
-//    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-//        alert: true, badge: true, sound: true);
-//    try {
-//      var token = await FirebaseMessaging.instance.getToken();
-//      debugLog("FCM token => $token");
-//    } catch (e) {
-//      debugLog("Error getting FCM token: $e");
-//    }
-//  }
-//   FirebaseMessaging.instance.requestPermission();
-//   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-//   alert: true,
-//   badge: true,
-//   sound: true,
-//   );
-//   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-//   FirebaseMessaging.instance.onTokenRefresh.listen((event) async {
-//   debugLog("onTokenRefresh");
-//   UserData userData = getInstance();
-//   if ((await userData.accessToken())?.isNotEmpty == true) {
-//   ApiProvider apiProvider = getInstance();
-//   apiProvider.setFCMToken(event).then((value) async {
-//   debugLog("onTokenRefresheddddd");
-//   userData.setNeedRefreshFCMToken(false);
-//   }).catchError((e) {
-//   userData.setFCMToken(event);
-//   });
-//   }
-//   });
-// }
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:logger/logger.dart';
+import 'package:tedbook/firebase_options.dart';
+import 'package:tedbook/utils/notification_service.dart';
+
+class FirebaseService {
+  firebaseInit() async {
+    FirebaseMessaging.instance.requestPermission();
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
+
+  Future<String> getToken() async {
+    try {
+      var token = await FirebaseMessaging.instance.getToken();
+      if (token?.isNotEmpty == true) {
+        return token!;
+      }
+    } catch (e) {
+      Logger().e("Error getting FCM token: $e");
+    }
+    return "";
+  }
+
+  @pragma('vm:entry-point')
+  Future<void> _firebaseMessagingBackgroundHandler(
+      RemoteMessage message) async {
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform);
+    Logger().w("FCM background ${message.data}");
+    await showNotification(message, null);
+  }
+}

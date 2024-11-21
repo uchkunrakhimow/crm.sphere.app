@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
@@ -10,6 +11,7 @@ import 'package:tedbook/persistance/base_status.dart';
 import 'package:tedbook/persistance/text_style_const.dart';
 import 'package:tedbook/utils/color_utils.dart';
 import 'package:tedbook/utils/navigator_extension.dart';
+import 'package:tedbook/utils/notification_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,6 +30,7 @@ class _HomePageState extends State<HomePage>
     bloc = context.read<HomeBloc>();
     bloc.add(InitEvent());
     _tabController = TabController(length: 3, vsync: this);
+    listen();
     super.initState();
   }
 
@@ -35,6 +38,12 @@ class _HomePageState extends State<HomePage>
   void dispose() {
     bloc.socket.dispose();
     super.dispose();
+  }
+
+  listen() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      showNotification(message, context);
+    });
   }
 
   @override
@@ -59,13 +68,14 @@ class _HomePageState extends State<HomePage>
           } else if (state.status.type == StatusType.updated) {
             pop();
           } else if (state.status.type == StatusType.error) {
-            showToast(
-              state.status.message?.text ?? "",
-              context: context,
-              animation: StyledToastAnimation.scale,
-              backgroundColor: Colors.red,
-              position: StyledToastPosition(align: Alignment.topCenter),
-            );
+            if (state.status.message?.text?.isNotEmpty == true)
+              showToast(
+                state.status.message?.text ?? "",
+                context: context,
+                animation: StyledToastAnimation.scale,
+                backgroundColor: Colors.red,
+                position: StyledToastPosition(align: Alignment.topCenter),
+              );
           }
         },
         child: SafeArea(
