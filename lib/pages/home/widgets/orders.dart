@@ -51,6 +51,7 @@ class OrdersWidget extends StatelessWidget {
     required int index,
   }) {
     bool isPending = getStatusType(order.status) == OrderStatus.pending;
+    bool isReturning = getStatusType(order.status) == OrderStatus.returning;
     return Column(
       children: [
         ClipRRect(
@@ -83,13 +84,18 @@ class OrdersWidget extends StatelessWidget {
               collapsedShape: Border.all(color: Colors.transparent, width: 0),
               children: [
                 SizedBox(
-                  height: isPending ? 108 : 60,
+                  height: (isPending || isReturning) ? 108 : 60,
                   child: Stack(
                     children: [
-                      if (isPending)
+                      if (isPending || isReturning)
                         Align(
                           alignment: Alignment.bottomCenter,
-                          child: OrderCompleteCard(orderId: order.id ?? ""),
+                          child: OrderCompleteCard(
+                            orderId: order.id ?? "",
+                            orderStatus: isPending
+                                ? OrderStatus.pending
+                                : OrderStatus.returning,
+                          ),
                         ),
                       Align(
                         alignment: Alignment.topCenter,

@@ -103,6 +103,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       (value) {
         if (value.data?.ordersList?.isNotEmpty == true) {
           _ordersList.clear();
+          _returningList.clear();
           _deliveredList.clear();
           _canceledList.clear();
           for (var item in value.data!.ordersList!) {
@@ -110,15 +111,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             commentFocuses[item.id ?? ""] = FocusNode();
             if (getStatusType(item.status) == OrderStatus.pending) {
               _ordersList.add(item);
+            } else if (getStatusType(item.status) == OrderStatus.returning) {
+              _returningList.add(item);
             } else if (getStatusType(item.status) == OrderStatus.delivered) {
               _deliveredList.add(item);
             } else {
               _canceledList.add(item);
             }
           }
+          Logger().w(
+              "_ordersList: ${_ordersList.length}\n_returningList:${_returningList.length}\n_deliveredList:${_deliveredList.length}\n_canceledList:${_canceledList.length}");
           emit(state.copyWith(
             status: BaseStatus.success(),
             ordersList: _ordersList,
+            returningList: _returningList,
             deliveredList: _deliveredList,
             canceledList: _canceledList,
           ));
@@ -200,6 +206,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final UserData _userData = getInstance();
   late IO.Socket socket;
   List<OrderModel> _ordersList = [];
+  List<OrderModel> _returningList = [];
   List<OrderModel> _deliveredList = [];
   List<OrderModel> _canceledList = [];
   var commentControllers = {};

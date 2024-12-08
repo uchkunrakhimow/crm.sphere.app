@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage>
   void initState() {
     bloc = context.read<HomeBloc>();
     bloc.add(InitEvent());
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     listen();
     super.initState();
   }
@@ -127,6 +127,7 @@ class _HomePageState extends State<HomePage>
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _tabBarItem(
                   title: "Заявки",
@@ -137,23 +138,30 @@ class _HomePageState extends State<HomePage>
                   },
                   count: state.ordersList?.length ?? 0,
                 ),
-                SizedBox(width: 16),
                 _tabBarItem(
-                  title: "Отмена",
+                  title: "Возвращение",
                   isSelected: state.selectedOrderType == 1,
                   onTap: () {
                     _tabController.animateTo(1);
                     bloc.add(ChangeOrderTypeEvent(selectedTypeIndex: 1));
                   },
-                  count: state.canceledList?.length ?? 0,
+                  count: state.returningList?.length ?? 0,
                 ),
-                SizedBox(width: 16),
                 _tabBarItem(
-                  title: "Доставлен",
+                  title: "Возвращено",
                   isSelected: state.selectedOrderType == 2,
                   onTap: () {
                     _tabController.animateTo(2);
                     bloc.add(ChangeOrderTypeEvent(selectedTypeIndex: 2));
+                  },
+                  count: state.canceledList?.length ?? 0,
+                ),
+                _tabBarItem(
+                  title: "Доставлен",
+                  isSelected: state.selectedOrderType == 3,
+                  onTap: () {
+                    _tabController.animateTo(3);
+                    bloc.add(ChangeOrderTypeEvent(selectedTypeIndex: 3));
                   },
                   count: state.deliveredList?.length ?? 0,
                 ),
@@ -177,6 +185,7 @@ class _HomePageState extends State<HomePage>
               physics: NeverScrollableScrollPhysics(),
               children: [
                 OrdersWidget(ordersList: state.ordersList),
+                OrdersWidget(ordersList: state.returningList),
                 OrdersWidget(ordersList: state.canceledList),
                 OrdersWidget(ordersList: state.deliveredList),
               ],
@@ -192,50 +201,48 @@ Widget _tabBarItem({
   required Function onTap,
   required int count,
 }) =>
-    Expanded(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(30),
-        onTap: () {
-          onTap.call();
-        },
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              height: 50,
-              padding: EdgeInsets.all(12),
+    InkWell(
+      borderRadius: BorderRadius.circular(30),
+      onTap: () {
+        onTap.call();
+      },
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            height: 50,
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              color: isSelected ? AppColor.blackColor : Colors.white,
+            ),
+            child: Text(
+              title,
+              style: TextStyleS.s12w600(
+                color: isSelected ? Colors.white : Colors.black,
+              ),
+            ),
+            alignment: Alignment.center,
+          ),
+          Positioned(
+            right: 0,
+            top: -13,
+            child: Container(
+              height: 26,
+              width: 26,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                color: isSelected ? AppColor.blackColor : Colors.white,
+                shape: BoxShape.circle,
+                color: AppColor.orangeColor,
               ),
               child: Text(
-                title,
-                style: TextStyleS.s14w600(
-                  color: isSelected ? Colors.white : Colors.black,
+                count.toString(),
+                style: TextStyleS.s14w700(
+                  color: Colors.white,
                 ),
               ),
               alignment: Alignment.center,
             ),
-            Positioned(
-              right: 0,
-              top: -13,
-              child: Container(
-                height: 26,
-                width: 26,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColor.orangeColor,
-                ),
-                child: Text(
-                  count.toString(),
-                  style: TextStyleS.s14w700(
-                    color: Colors.white,
-                  ),
-                ),
-                alignment: Alignment.center,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );

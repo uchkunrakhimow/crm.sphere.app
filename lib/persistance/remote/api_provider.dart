@@ -183,7 +183,7 @@ class ApiProvider {
   Future<dynamic> setFirebaseToken(FirebaseTokenRequest request) async {
     try {
       final response = (await _dio.post(
-        "$baseUrl/api/set-token",
+        "$baseUrl/api/v1/set-token",
         data: request.toJson(),
       ))
           .data;
@@ -197,7 +197,7 @@ class ApiProvider {
   Future<OrderResponse> getOrders(String userId) async {
     try {
       final response =
-          (await _dio.get("$baseUrl/api/order/v2/user/$userId")).data;
+          (await _dio.get("$baseUrl/api/v1/order/user/$userId")).data;
       return OrderResponse.fromJson(response);
     } catch (e) {
       debugLog("$e");
@@ -209,7 +209,7 @@ class ApiProvider {
       {required String orderId, required PutOrderRequest request}) async {
     try {
       final response = (await _dio.put(
-        "$baseUrl/api/order/$orderId",
+        "$baseUrl/api/v1/order/$orderId",
         data: request.toJson(),
       ))
           .data;

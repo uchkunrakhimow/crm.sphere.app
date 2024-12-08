@@ -4,18 +4,29 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tedbook/pages/home/bloc/home_bloc.dart';
 import 'package:tedbook/persistance/text_style_const.dart';
 import 'package:tedbook/utils/color_utils.dart';
+import 'package:tedbook/utils/navigator_extension.dart';
+import 'package:tedbook/utils/order_status.dart';
 import 'package:tedbook/widgets/custom_button.dart';
 
 class OrderCompleteCard extends StatelessWidget {
   final String orderId;
+  final OrderStatus orderStatus;
 
-  const OrderCompleteCard({super.key, required this.orderId});
+  const OrderCompleteCard({
+    super.key,
+    required this.orderId,
+    required this.orderStatus,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        showConfirmOrderModal(context, orderId: orderId);
+        if (orderStatus == OrderStatus.pending) {
+          showConfirmOrderModal(context, orderId: orderId);
+        } else if (orderStatus == OrderStatus.returning) {
+          showConfirmOrderDialog(context, orderId: orderId);
+        }
       },
       child: Container(
         margin: EdgeInsets.zero,
@@ -77,11 +88,11 @@ class OrderCompleteCard extends StatelessWidget {
                           ),
                     ),
                     _buildActionButton(
-                      text: "Клиент отказался",
+                      text: "Возврат",
                       color: AppColor.redColor,
                       onTap: () => context.read<HomeBloc>().add(
                             OrderCompletionEvent(
-                                orderId: orderId, status: "Canceled"),
+                                orderId: orderId, status: "Returning"),
                           ),
                     ),
                   ],
@@ -89,6 +100,45 @@ class OrderCompleteCard extends StatelessWidget {
                 alignment: Alignment.center,
               ),
             ],
+          );
+        },
+      );
+
+  showConfirmOrderDialog(
+    BuildContext context, {
+    required String orderId,
+  }) =>
+      showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            title: Text(
+              "Вы действительно доставили?",
+              style: TextStyleS.s14w600(),
+            ),
+            content: Row(
+              children: [
+                Flexible(
+                  child: CustomButton(
+                    text: "Нет",
+                    height: 40,
+                    backColor: Colors.red,
+                    onTap: () => context.pop(),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Flexible(
+                  child: CustomButton(
+                    text: "Да",
+                    height: 40,
+                    onTap: () => context.read<HomeBloc>().add(
+                          OrderCompletionEvent(
+                              orderId: orderId, status: "Returned"),
+                        ),
+                  ),
+                ),
+              ],
+            ),
           );
         },
       );
