@@ -71,7 +71,6 @@ class ApiProvider {
           return handler.next(options);
         },
         onResponse: (Response response, ResponseInterceptorHandler handler) {
-          retryCount = 0;
           debugLog(
               "----------------------------------------------------------------\n\t\t\tResponse\n\tMethod: ${response.requestOptions.method}\n\tPath: ${response.requestOptions.path}\n\tStatusCode: ${response.statusCode}\n\tStatusMessage: ${response.statusMessage}\n\tHeader: ${response.requestOptions.headers}\n${response.data != null ? "\tBody: ${getBodyData(response.data)}\n" : ""}\n----------------------------------------------------------------------");
           return handler.next(response);
@@ -95,12 +94,10 @@ class ApiProvider {
   // Don't use create or default constructor. Use getInstance() method to get ApiProvider object
   factory ApiProvider.create() => ApiProvider._();
 
-  // static const baseUrl = 'https://techdev.uz';
-  static const baseUrl = 'https://api.tedbookcrm.uz';
+  static const baseUrl = 'https://techdev.uz';
+  // static const baseUrl = 'https://api.tedbookcrm.uz';
 
   static const authApi = '$baseUrl/auth';
-
-  var retryCount = 0;
 
   String getBodyData(dynamic data) {
     try {

@@ -119,8 +119,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
               _canceledList.add(item);
             }
           }
-          Logger().w(
-              "_ordersList: ${_ordersList.length}\n_returningList:${_returningList.length}\n_deliveredList:${_deliveredList.length}\n_canceledList:${_canceledList.length}");
           emit(state.copyWith(
             status: BaseStatus.success(),
             ordersList: _ordersList,
@@ -199,6 +197,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   logout(LogoutEvent event, Emitter<HomeState> emit) async {
     await _userData.clearAllData();
+    socket.dispose();
     emit(state.copyWith(status: BaseStatus.logout()));
   }
 
